@@ -12,7 +12,7 @@ let db = new sqlite3.Database("stocks.db", (err) => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
       amount INTEGER,
-      target-amount INTEGER,
+      target INTEGER,
       updated INTEGER
     )`,
     (err) => {
@@ -21,16 +21,16 @@ let db = new sqlite3.Database("stocks.db", (err) => {
       }
 
       var insert =
-        "INSERT INTO stocks (name, amount, target-amount, updated) VALUES (?,?,?,?)";
+        "INSERT INTO stocks (name, amount, target, updated) VALUES (?,?,?,?)";
 
       db.run(insert, [
-        "spaghetti",
+        "canned tomatoes",
         2,
         2,
         Date.now(),
       ]);
       db.run(insert, [
-        "flour",
+        "spaghetti",
         1,
         2,
         Date.now(),

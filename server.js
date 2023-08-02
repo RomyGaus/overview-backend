@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-// const db = require("./database.js");
+const db = require("./database.js");
 
 app.use(express.json());
 
@@ -10,7 +10,7 @@ app.get("/", (req, res) => {
     res.json({ message: "OK" });
 });
 
-app.get("/todo", (req, res) => {
+app.get("/stocks", (req, res) => {
     let sql = "SELECT * FROM stocks";
     let params = [];
   
