@@ -6,6 +6,7 @@ app.use(express.json());
 
 const HTTP_PORT = 3000;
 
+// READ
 app.get("/", (req, res) => {
     res.json({ message: "OK" });
 });
@@ -25,6 +26,62 @@ app.get("/stocks", (req, res) => {
         data: rows,
       });
     });
+});
+
+app.get("/stocks/:id", (req, res) => {
+  let sql = "SELECT * FROM stocks WHERE id = ?";
+  let params = [req.params.id];
+
+  db.get(sql, params, (err, row) => {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    res.json({
+      message: "success",
+      data: row,
+    });
+  });
+});
+
+//CREATE
+app.post("/stocks", (req, res) => {
+  let errors = [];
+
+  if (!req.body.name) {
+    errors.push("No name specified");
+  }
+
+  if (errors.length) {
+    res.status(400).json({
+      error: errors,
+    });
+  }
+
+  let data = {
+    name: req.body.name,
+    amount: req.body.amount,
+    target: req.body.target,
+    updated: Date.now(),
+  };
+
+  let sql =
+    "INSERT INTO stocks (name, amount, target, updated) VALUES (?,?,?,?)";
+
+  let params = [data.name, data.amount, data.target, data.updated];
+
+  db.run(sql, params, function (err) {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+  
+    res.json({
+      message: "success",
+      data: data,
+      id: this.lastID,
+    });
+  });
 });
 
 
