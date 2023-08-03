@@ -84,7 +84,58 @@ app.post("/stocks", (req, res) => {
   });
 });
 
+//UPDATE
+app.patch("/stocks/:id", (req, res) => {
+  let data = {
+    name: req.body.name,
+    amount: req.body.amount,
+    target: req.body.target,
+    updated: Date.now(),
+  };
 
+  let sql = `UPDATE stocks SET
+    name = COALESCE(?, name),
+    amount = ?,
+    target = ?,
+    updated = ?
+    WHERE id = ?`;
+
+  let params = [
+    data.name,
+    data.amount,
+    data.target,
+    data.updated,
+    req.params.id,
+  ];
+
+  db.run(sql, params, function (err) {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+
+    res.json({
+      message: "success",
+      data: data,
+      changes: this.changes,
+    });
+  });
+});
+
+//DELETE
+app.delete("/stocks/:id", (req, res) => {
+  let sql = "DELETE FROM stocks WHERE id = ?";
+  let params = [req.params.id];
+
+  db.run(sql, params, function (err) {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+
+    res.json({ message: "success", changes: this.changes });
+  });
+});
 
 
 app.use((req, res) => {
