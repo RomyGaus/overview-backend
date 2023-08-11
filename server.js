@@ -1,16 +1,21 @@
 const express = require("express");
-const app = express();
+const cors = require("cors");
 const db = require("./database.js");
 
+const app = express();
+app.use(cors({
+  methods: ["GET,HEAD,PUT,PATCH,POST,DELETE"]
+}))
 app.use(express.json());
 
-const HTTP_PORT = 3000;
+const HTTP_PORT = 8000;
 
 // READ
 app.get("/", (req, res) => {
     res.json({ message: "OK" });
 });
 
+//Read all
 app.get("/stocks", (req, res) => {
     let sql = "SELECT * FROM stocks";
     let params = [];
@@ -28,6 +33,8 @@ app.get("/stocks", (req, res) => {
     });
 });
 
+
+//Read one
 app.get("/stocks/:id", (req, res) => {
   let sql = "SELECT * FROM stocks WHERE id = ?";
   let params = [req.params.id];
@@ -44,20 +51,26 @@ app.get("/stocks/:id", (req, res) => {
   });
 });
 
+//Read only where amount < target
+app.get("/shoppinglist", (req, res) => {
+  let sql = "SELECT * FROM stocks WHERE amount < target";
+  let params = [];
+
+  db.all(sql, params, (err, rows) => {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+
+    res.json({
+      message: "success",
+      data: rows,
+    });
+  });
+});
+
 //CREATE
 app.post("/stocks", (req, res) => {
-  let errors = [];
-
-  if (!req.body.name) {
-    errors.push("No name specified");
-  }
-
-  if (errors.length) {
-    res.status(400).json({
-      error: errors,
-    });
-  }
-
   let data = {
     name: req.body.name,
     amount: req.body.amount,
@@ -132,7 +145,6 @@ app.delete("/stocks/:id", (req, res) => {
       res.status(400).json({ error: err.message });
       return;
     }
-
     res.json({ message: "success", changes: this.changes });
   });
 });
