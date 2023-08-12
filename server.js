@@ -99,27 +99,24 @@ app.post("/stocks", (req, res) => {
 
 //UPDATE
 app.patch("/stocks/:id", (req, res) => {
-  let data = {
-    name: req.body.name,
-    amount: req.body.amount,
-    target: req.body.target,
-    updated: Date.now(),
-  };
+  let data = req.body;
 
-  let sql = `UPDATE stocks SET
-    name = COALESCE(?, name),
-    amount = ?,
-    target = ?,
-    updated = ?
-    WHERE id = ?`;
+  if (Object.keys(data).length === 0) {
+    res.status(400).json({ error: "No values to update."});
+      return;
+  }
 
-  let params = [
-    data.name,
-    data.amount,
-    data.target,
-    data.updated,
-    req.params.id,
-  ];
+  data["updated"] = Date.now();
+  
+  let sql = `UPDATE stocks SET`;
+  const params = [];
+  Object.entries(data).forEach(([key, value]) => {
+      sql += ` ${key}=?,`;
+      params.push(value);
+  });
+  sql = sql.slice(0, -1);
+  sql += ' WHERE id=?;';
+  params.push(req.params.id);
 
   db.run(sql, params, function (err) {
     if (err) {
